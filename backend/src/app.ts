@@ -10,8 +10,6 @@ import router from './router';
 import utils from './utils';
 
 const app = express();
-mongoose.connect(configs.env.dbAddress);
-utils.file.startTempUploadCleanup();
 
 app.use(configs.limiter);
 
@@ -34,4 +32,18 @@ app.use(middlewares.error.handleCelebrateErrors);
 app.use(middlewares.error.handleMulterErrors);
 app.use(middlewares.error.handleError);
 
-app.listen(configs.env.port);
+const startServer = async (): Promise<void> => {
+  try {
+    await mongoose.connect(configs.env.dbAddress);
+    await utils.file.startTempUploadCleanup();
+  } catch (error) {
+    const message = error instanceof Error ? error.stack ?? error.message : String(error);
+    process.stderr.write(`Не удалось запустить сервер:\n${message}\n`);
+    process.exitCode = 1;
+    return;
+  }
+
+  app.listen(configs.env.port);
+};
+
+startServer();

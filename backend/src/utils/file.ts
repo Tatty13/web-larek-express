@@ -4,13 +4,24 @@ import {
 } from 'node:fs/promises';
 import path from 'node:path';
 import cron from 'node-cron';
+import type { TaskContext } from 'node-cron';
 
 import configs from '../configs';
 import utilsErrors from './errors';
 import utilsRegExp from './regExp';
 
-const TEMP_UPLOAD_DIR = path.join(__dirname, '..', 'temp', 'uploads');
-const PUBLIC_IMAGE_DIR = path.join(__dirname, '..', 'public', 'images');
+const BACKEND_ROOT = path.resolve(__dirname, '..', '..');
+const TEMP_UPLOAD_DIR = path.resolve(
+  BACKEND_ROOT,
+  'src',
+  configs.env.uploadPathTemp,
+);
+const PUBLIC_IMAGE_DIR = path.resolve(
+  BACKEND_ROOT,
+  'src',
+  'public',
+  configs.env.uploadPath,
+);
 
 export type PublicImageSaveResult = {
   destination: string;
@@ -99,16 +110,32 @@ const cleanupTempUploads = async (): Promise<void> => {
 };
 
 /** очищаем файлы при запуске, далее раз в сутки в полночь */
-const startTempUploadCleanup = (): void => {
-  cron.schedule('0 0 * * *', async () => {
+const startTempUploadCleanup = async (): Promise<void> => {
+  const cleanupTask = cron.schedule('0 0 * * *', async () => {
     await cleanupTempUploads();
   });
 
-  cleanupTempUploads();
+  const reportCleanupError = (error: unknown) => {
+    const message = error instanceof Error
+      ? (error.stack ?? error.message)
+      : String(error ?? 'Неизвестная ошибка');
+    process.stderr.write(`Не удалось очистить временные файлы:\n${message}\n`);
+  };
+
+  cleanupTask.on('execution:failed', (context: TaskContext) => {
+    reportCleanupError(context.execution?.error ?? context.error);
+  });
+
+  try {
+    await cleanupTempUploads();
+  } catch (error) {
+    reportCleanupError(error);
+  }
 };
 
 const utilsFile = {
   TEMP_UPLOAD_DIR,
+  PUBLIC_IMAGE_DIR,
   savePublicImage,
   removePublicImage,
   removeImageByPath,

@@ -6,9 +6,10 @@ import utils from '../utils';
 
 const imageExtensions: Record<string, string> = {
   'image/gif': '.gif',
+  'image/jpg': '.jpg',
   'image/jpeg': '.jpg',
   'image/png': '.png',
-  'image/webp': '.webp',
+  'image/svg+xml': '.svg',
 };
 
 const storage: multer.Options['storage'] = multer.diskStorage({
@@ -34,7 +35,7 @@ const fileFilter: multer.Options['fileFilter'] = (_req, file, callback) => {
   if (!imageExtensions[file.mimetype]) {
     callback(
       new utils.errors.BadRequestError(
-        'Допустимы только изображения JPEG, PNG, GIF и WebP',
+        'Допустимы только изображения PNG, JPG, JPEG, GIF и SVG',
       ),
     );
     return;
