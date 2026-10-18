@@ -6,15 +6,16 @@ const joiName = Joi.string().min(2).max(30);
 const joiPassword = Joi.string().min(6).required();
 const joiEmail = Joi.string().pattern(utils.regExp.email).required();
 
-const loginSchema = Joi.object({
+const credentialsSchema = {
   email: joiEmail,
   password: joiPassword,
-});
+};
+
+const loginSchema = Joi.object(credentialsSchema);
 
 const registrationSchema = Joi.object({
   name: joiName,
-  email: joiEmail,
-  password: joiPassword,
+  ...credentialsSchema,
 });
 
 const validateUserCredentialOnLogin = celebrate({

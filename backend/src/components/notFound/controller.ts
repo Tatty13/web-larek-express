@@ -7,7 +7,7 @@ function handleUnknownRoute(
   _res: Response,
   next: NextFunction,
 ) {
-  next(new utils.errors.NotFoundError('Страница не найдена'));
+  next(new utils.errors.NotFoundError('Путь не найден'));
 }
 
 const controllerNotFound = {

@@ -45,7 +45,7 @@ const createOrder = async (
       );
     }
 
-    res.send({ id: randomUUID(), total });
+    res.status(utils.statusCode.CREATED_201).send({ id: randomUUID(), total });
   } catch (err) {
     next(err);
   }
