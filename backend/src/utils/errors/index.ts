@@ -4,6 +4,7 @@ import ConflictError from './conflictError';
 import CustomError from './customError';
 import ForbiddenError from './forbiddenError';
 import utilsMongoose from './mongoos';
+import utilsMulter from './multer';
 import NotFoundError from './notFoundError';
 import ValidationError from './validationError';
 
@@ -19,6 +20,7 @@ const utilsErrors = {
   ValidationError,
   isCustomError,
   mongoose: utilsMongoose,
+  multer: utilsMulter,
 };
 
 export default utilsErrors;

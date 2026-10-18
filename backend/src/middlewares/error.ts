@@ -11,11 +11,26 @@ const handleCelebrateErrors = (
 ) => {
   if (isCelebrateError(err)) {
     const [errData] = err.details.values().next().value?.details || [];
-    next(new utils.errors.BadRequestError(errData.message));
-    return;
+    return next(new utils.errors.BadRequestError(errData.message));
   }
 
-  next(err);
+  return next(err);
+};
+
+const handleMulterErrors = (
+  err: Error,
+  _req: Request,
+  _res: Response,
+  next: NextFunction,
+) => {
+  if (utils.errors.multer.isMulterError(err)) {
+    const message = utils.errors.multer.isLimitError(err)
+      ? 'Размер файла не должен превышать 5 МБ'
+      : 'Не удалось загрузить файл';
+    return next(new utils.errors.BadRequestError(message));
+  }
+
+  return next(err);
 };
 
 const handleError = (
@@ -29,11 +44,12 @@ const handleError = (
     : utils.statusCode.INTERNAL_SERVER_ERROR_500;
   const message = err.message || 'На сервере произошла ошибка';
 
-  res.status(statusCode).send({ message });
+  return res.status(statusCode).send({ message });
 };
 
 const errorMiddleware = {
   handleCelebrateErrors,
+  handleMulterErrors,
   handleError,
 };
 

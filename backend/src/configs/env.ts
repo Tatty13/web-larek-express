@@ -1,4 +1,5 @@
 import dotenv from 'dotenv';
+import ms from 'ms';
 
 dotenv.config();
 
@@ -14,7 +15,7 @@ const envConfig = {
     secret: process.env.AUTH_REFRESH_TOKEN_SECRET,
     maxAge: process.env.AUTH_REFRESH_TOKEN_EXPIRY ?? '7d',
   },
-
+  tempFileMaxAgeMs: ms((process.env.TEMP_FILE_MAX_AGE ?? '24h') as ms.StringValue),
 };
 
 export default envConfig;
